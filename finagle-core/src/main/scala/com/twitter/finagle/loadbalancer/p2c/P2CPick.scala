@@ -24,7 +24,8 @@ private[loadbalancer] object P2CPick {
     vec: IndexedSeq[Node],
     range: Int,
     rng: Rng,
-    p2cZeroCounter: Counter
+    p2cZeroCounter: Counter,
+    beta: Double = 0.5 // Should be updated to 1.0.
   ): Node = {
     assert(vec.nonEmpty)
 
@@ -38,10 +39,13 @@ private[loadbalancer] object P2CPick {
       // entire range greater than "hole" uniformly (hence, the >= in the collision
       // comparison).
       val a = rng.nextInt(range)
+      val nodeA = vec(a)
+      if (rng.nextDouble() > beta) nodeA;
+      
+      // Otherwise, take two samples.
       var b = rng.nextInt(range - 1)
       if (b >= a) { b = b + 1 }
-
-      val nodeA = vec(a)
+      
       val nodeB = vec(b)
 
       // If both nodes are in the same health status, we pick the least loaded
